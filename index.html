@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>みさこのストーリー解説集（編集用）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F3F7F9;
+    --ink:#1C2E38;
+    --ink-soft:#5C7480;
+    --rose:#2B7A9E;
+    --rose-deep:#1B5A78;
+    --card:#FFFFFF;
+    --line:#D9E6EB;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--paper);color:var(--ink);font-family:'Zen Kaku Gothic New', sans-serif;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:920px;margin:0 auto;padding:56px 24px 100px;}
+
+  header{margin-bottom:36px;}
+  .kicker{font-size:12.5px;letter-spacing:.14em;color:var(--rose-deep);margin:0 0 10px;font-weight:500;}
+  h1{font-family:'Shippori Mincho', serif;font-weight:700;font-size:clamp(28px,5vw,42px);line-height:1.35;margin:0 0 14px;}
+  h1 .accent{color:var(--rose);}
+  .lede{font-size:14.5px;line-height:1.9;color:var(--ink-soft);max-width:56ch;margin:0;}
+
+  .toolbar{margin-top:28px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .edit-toggle{font-family:inherit;font-size:13px;font-weight:500;padding:10px 18px;border-radius:999px;border:1px solid var(--ink);background:var(--ink);color:#fff;cursor:pointer;}
+  .edit-toggle.off{background:#fff;color:var(--ink);}
+  .toolbar-right{display:flex;gap:8px;flex-wrap:wrap;}
+  .ghost-btn{font-family:inherit;font-size:12.5px;padding:9px 14px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink-soft);cursor:pointer;}
+  .ghost-btn:hover{border-color:var(--rose);color:var(--rose-deep);}
+  .ghost-btn.primary{background:var(--rose);border-color:var(--rose);color:#fff;}
+  .ghost-btn.primary:hover{opacity:.9;color:#fff;}
+
+  .controls{margin-top:20px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:16px 0;}
+  .tabs{display:flex;flex-wrap:wrap;gap:8px;}
+  .tab{font-family:inherit;font-size:13px;padding:8px 16px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink-soft);cursor:pointer;}
+  .tab.active{background:var(--ink);border-color:var(--ink);color:#fff;}
+  .search{position:relative;min-width:200px;}
+  .search input{width:100%;font-family:inherit;font-size:13px;padding:9px 14px 9px 32px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);outline:none;}
+  .search input:focus{border-color:var(--rose);}
+  .search::before{content:"";position:absolute;left:12px;top:50%;width:11px;height:11px;transform:translateY(-50%);border:1.5px solid var(--ink-soft);border-radius:50%;}
+  .search::after{content:"";position:absolute;left:20px;top:60%;width:6px;height:1.5px;background:var(--ink-soft);transform:rotate(45deg);}
+
+  .count{font-size:12px;color:var(--ink-soft);margin:18px 2px 0;}
+
+  .bulk-bar{display:none;align-items:center;gap:10px;justify-content:flex-end;padding:14px 0 0;font-size:12.5px;color:var(--ink-soft);}
+  .bulk-bar.show{display:flex;}
+
+  .add-row{margin-top:18px;}
+  .add-btn{width:100%;font-family:inherit;font-size:13.5px;padding:16px;border-radius:14px;border:1.5px dashed var(--line);background:transparent;color:var(--ink-soft);cursor:pointer;display:none;}
+  .add-btn.show{display:block;}
+  .add-btn:hover{border-color:var(--rose);color:var(--rose-deep);}
+
+  .entry{display:grid;grid-template-columns:172px 1fr;gap:32px;padding:36px 0;border-bottom:1px solid var(--line);align-items:start;position:relative;}
+  .entry:first-of-type{padding-top:28px;}
+
+  .phone{width:172px;height:306px;border-radius:22px;position:relative;overflow:hidden;box-shadow:0 10px 26px -14px rgba(28,46,56,.35);flex-shrink:0;background-size:cover;background-position:center;}
+  .phone .badge{position:absolute;top:10px;left:10px;font-size:9.5px;letter-spacing:.05em;color:#fff;background:rgba(0,0,0,.28);padding:3px 8px;border-radius:999px;}
+  .spark{position:absolute;border-radius:50%;background:#fff;opacity:.85;}
+  .select-check{position:absolute;top:10px;right:10px;width:22px;height:22px;border-radius:6px;background:rgba(255,255,255,.9);border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:var(--ink);z-index:2;padding:0;}
+  .select-check.checked{background:var(--ink);border-color:var(--ink);color:#fff;}
+
+  .no{font-family:'Shippori Mincho', serif;font-size:12.5px;color:var(--rose-deep);letter-spacing:.06em;margin:0 0 6px;}
+  .tag{display:inline-block;font-size:11px;color:var(--rose-deep);border:1px solid #C7DEE7;background:#EAF4F8;padding:2px 9px;border-radius:999px;margin:0 6px 6px 0;}
+  .entry-tags{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 10px;}
+  .title{font-family:'Shippori Mincho', serif;font-weight:700;font-size:21px;line-height:1.5;margin:0 0 14px;}
+  .howto-label{font-size:11px;color:var(--ink-soft);letter-spacing:.1em;margin:0 0 6px;}
+  .howto{font-size:14px;line-height:1.95;color:var(--ink);margin:0;max-width:56ch;white-space:pre-wrap;}
+
+  .entry-actions{display:none;gap:8px;margin-top:16px;}
+  .entry-actions.show{display:flex;}
+  .mini-btn{font-family:inherit;font-size:12px;padding:6px 13px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink-soft);cursor:pointer;}
+  .mini-btn.edit:hover{border-color:var(--rose);color:var(--rose-deep);}
+  .mini-btn.del:hover{border-color:#B23A3A;color:#B23A3A;}
+
+  .foot{margin-top:48px;font-size:12px;color:var(--ink-soft);text-align:center;line-height:1.9;}
+
+  .overlay{position:fixed;inset:0;background:rgba(28,46,56,.45);display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto;z-index:50;}
+  .overlay.show{display:flex;}
+  .modal{background:#fff;border-radius:18px;max-width:520px;width:100%;padding:32px;box-shadow:0 30px 60px -20px rgba(0,0,0,.35);}
+  .modal h3{font-family:'Shippori Mincho', serif;font-size:19px;margin:0 0 22px;}
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:12px;color:var(--ink-soft);margin-bottom:6px;}
+  .field input, .field textarea{width:100%;font-family:inherit;font-size:13.5px;padding:10px 12px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--ink);outline:none;}
+  .field input:focus, .field textarea:focus{border-color:var(--rose);}
+  .field textarea{resize:vertical;min-height:70px;line-height:1.7;}
+  .field .hint{font-size:11px;color:var(--ink-soft);margin-top:5px;}
+  .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:24px;}
+  .btn-primary{font-family:inherit;font-size:13px;font-weight:500;padding:10px 20px;border-radius:999px;border:1px solid var(--ink);background:var(--ink);color:#fff;cursor:pointer;}
+  .btn-secondary{font-family:inherit;font-size:13px;padding:10px 20px;border-radius:999px;border:1px solid var(--line);background:#fff;color:var(--ink-soft);cursor:pointer;}
+
+  .tag-editor{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;}
+  .tag-chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--rose-deep);background:#EAF4F8;border:1px solid #C7DEE7;padding:4px 6px 4px 11px;border-radius:999px;}
+  .tag-chip button{border:none;background:transparent;color:var(--rose-deep);cursor:pointer;font-size:13px;line-height:1;padding:2px;}
+  .tag-add-row{display:flex;gap:8px;}
+  .tag-add-row input{flex:1;}
+  .tag-add-row button{white-space:nowrap;font-family:inherit;font-size:12.5px;padding:0 16px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;}
+
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--ink);color:#fff;font-size:13px;padding:12px 20px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .2s ease, transform .2s ease;z-index:60;max-width:80vw;text-align:center;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  @media (max-width:600px){
+    .entry{grid-template-columns:1fr;gap:16px;}
+    .phone{width:132px;height:235px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <p class="kicker">STORY DESIGN NOTE — 編集用</p>
+    <h1>みさこの<span class="accent">ストーリー解説集</span></h1>
+    <p class="lede">ここで内容を作成・編集します。できあがったら「生徒用ページを書き出す」で、編集機能のない配布用ファイルを作成できます。データはこのパソコンのこのブラウザに保存されます。</p>
+  </header>
+
+  <div class="toolbar">
+    <button class="edit-toggle off" id="editToggle">✎ 編集モードをON</button>
+    <div class="toolbar-right" id="toolbarRight" style="display:none;">
+      <button class="ghost-btn" id="importBtn">JSONを読み込む</button>
+      <button class="ghost-btn" id="exportBtn">JSONを書き出す</button>
+      <button class="ghost-btn" id="selectToggleBtn">選択</button>
+      <button class="ghost-btn primary" id="exportStudentBtn">生徒用ページを書き出す</button>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="tabs" id="tabs"></div>
+    <div class="search">
+      <input type="text" id="searchInput" placeholder="キーワードで検索">
+    </div>
+  </div>
+
+  <div class="bulk-bar" id="bulkBar">
+    <span id="bulkCount">0件選択中</span>
+    <button class="mini-btn" id="bulkDuplicateBtn">複製</button>
+    <button class="mini-btn" id="bulkDeleteBtn" style="color:#B23A3A;border-color:#EFC9C9;">削除</button>
+    <button class="ghost-btn" id="bulkCancelBtn">選択を終了</button>
+  </div>
+
+  <p class="count" id="count"></p>
+
+  <div id="list"></div>
+
+  <div class="add-row">
+    <button class="add-btn" id="addBtn">＋ 新しい事例を追加</button>
+  </div>
+
+  <p class="foot">※ データはこのファイルを開いているブラウザ（このパソコンのこのChrome）にだけ保存されます。<br>別のパソコンやブラウザで開くと、内容は反映されません。共同編集する場合は「JSONを書き出す／読み込む」でデータを受け渡してください。</p>
+
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h3 id="modalTitle">新しい事例を追加</h3>
+    <div class="field">
+      <label>No.（例: No.011）</label>
+      <input type="text" id="f_no">
+    </div>
+    <div class="field">
+      <label>タグ（複数OK。自分で自由に作成できます）</label>
+      <div class="tag-editor" id="tagEditor"></div>
+      <div class="tag-add-row">
+        <input type="text" id="f_tagInput" list="tagList" placeholder="例: ローンチ開始／個別相談募集 など">
+        <datalist id="tagList"></datalist>
+        <button type="button" id="addTagBtn">追加</button>
+      </div>
+      <p class="hint">入力してEnter、または「追加」でタグをつけられます。×で外せます。</p>
+    </div>
+    <div class="field">
+      <label>タイトル</label>
+      <input type="text" id="f_title">
+    </div>
+    <div class="field">
+      <label>HOW TO</label>
+      <textarea id="f_howto"></textarea>
+    </div>
+    <div class="field">
+      <label>ストーリー画像</label>
+      <input type="file" id="f_imgFile" accept="image/*">
+      <p class="hint">端末から画像を選ぶとそのまま貼り付けられます（1枚3MBまで）。すでにURLがある場合は下に直接入力してもOKです。</p>
+      <input type="text" id="f_img" placeholder="画像URL（任意）" style="margin-top:8px;">
+      <div id="imgPreviewWrap" style="margin-top:10px;display:none;">
+        <img id="imgPreview" style="width:100px;height:178px;object-fit:cover;border-radius:10px;border:1px solid var(--line);">
+        <button type="button" class="mini-btn" id="clearImgBtn" style="margin-left:8px;">画像を削除</button>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" id="cancelBtn">キャンセル</button>
+      <button class="btn-primary" id="saveBtn">保存する</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'story-design-note:entries';
+function imgKeyFor(id){ return 'story-design-note:img:' + id; }
+const MAX_IMG_BYTES = 3 * 1024 * 1024;
+const EDIT_PASSWORD = 'bloom2024';
+
+const defaultEntries = [];
+
+const gradients = [
+  "linear-gradient(160deg,#BFE3EF,#7FB8CE)",
+  "linear-gradient(165deg,#E3F1F6,#B9D9E4)",
+  "linear-gradient(180deg,#16303F,#0B1A22)",
+  "linear-gradient(180deg,#123249,#0C4258)",
+  "linear-gradient(160deg,#D6E9F2,#A9CEDE)",
+  "linear-gradient(160deg,#CFE8E4,#9BC9C2)",
+  "linear-gradient(160deg,#AED4E8,#6FA8C4)",
+  "linear-gradient(160deg,#E0EFF5,#B7D4E2)"
+];
+function gradientFor(tag){
+  const t = tag || '未分類';
+  let h = 0;
+  for(let i=0;i<t.length;i++){ h = (h*31 + t.charCodeAt(i)) % gradients.length; }
+  return gradients[Math.abs(h)];
+}
+function migrate(list){
+  return (list || []).map(e => {
+    if(!e.tags){ e.tags = e.cat ? [e.cat] : []; }
+    return e;
+  });
+}
+function sparkles(){
+  let s = '';
+  for(let i=0;i<5;i++){
+    const x = 15 + Math.random()*140;
+    const y = 20 + Math.random()*140;
+    const r = 1 + Math.random()*2;
+    s += `<span class="spark" style="left:${x}px;top:${y}px;width:${r}px;height:${r}px;"></span>`;
+  }
+  return s;
+}
+function escapeHtml(str){
+  return (str || '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+
+let entries = [];
+let imageCache = {};
+let editMode = false;
+let selectMode = false;
+let selectedIds = new Set();
+let activeTag = 'all';
+let query = '';
+let editingId = null;
+let currentTags = [];
+let originalImgFlag = '';
+let explicitImgClear = false;
+
+function loadEntries(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    entries = raw ? migrate(JSON.parse(raw)) : defaultEntries.slice();
+  }catch(e){
+    entries = defaultEntries.slice();
+  }
+}
+function saveEntries(){
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+  }catch(e){
+    showToast('保存に失敗しました。画像のサイズを小さくしてお試しください。');
+  }
+}
+function saveImage(id, dataUrl){
+  localStorage.setItem(imgKeyFor(id), dataUrl);
+}
+function deleteImage(id){
+  try{ localStorage.removeItem(imgKeyFor(id)); }catch(e){}
+}
+function loadAllImages(){
+  entries.filter(e => e.img === 'local').forEach(e => {
+    const val = localStorage.getItem(imgKeyFor(e.id));
+    if(val) imageCache[e.id] = val;
+  });
+}
+function imgSrcFor(e){
+  if(!e.img) return '';
+  if(e.img === 'local') return imageCache[e.id] || '';
+  return e.img;
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=> t.classList.remove('show'), 2200);
+}
+
+function renderTabs(){
+  const allTags = Array.from(new Set(entries.flatMap(e => e.tags || []))).filter(Boolean);
+  const tabsEl = document.getElementById('tabs');
+  tabsEl.innerHTML = `<button class="tab ${activeTag==='all'?'active':''}" data-tag="all">すべて</button>` +
+    allTags.map(t => `<button class="tab ${activeTag===t?'active':''}" data-tag="${escapeHtml(t)}">${escapeHtml(t)}</button>`).join('');
+  const dl = document.getElementById('tagList');
+  dl.innerHTML = allTags.map(t => `<option value="${escapeHtml(t)}">`).join('');
+}
+
+function renderList(){
+  let list = entries.filter(e => activeTag === 'all' || (e.tags || []).includes(activeTag));
+  if(query.trim()){
+    const q = query.trim();
+    list = list.filter(e => (e.title + e.howto + (e.tags||[]).join('')).includes(q));
+  }
+  document.getElementById('count').textContent = list.length + ' 件表示中';
+
+  const el = document.getElementById('list');
+  if(list.length === 0){
+    el.innerHTML = `<p style="padding:40px 0;color:var(--ink-soft);font-size:13.5px;">該当する事例がありません。</p>`;
+    return;
+  }
+
+  el.innerHTML = list.map(e => {
+    const tags = e.tags || [];
+    const primaryTag = tags[0] || '';
+    const imgSrc = imgSrcFor(e);
+    const bg = imgSrc ? `background-image:url('${escapeHtml(imgSrc)}');` : `background:${gradientFor(primaryTag)};`;
+    const checked = selectedIds.has(e.id);
+    return `
+    <div class="entry" data-id="${e.id}">
+      <div class="phone" style="${bg}">
+        ${selectMode ? `<button class="select-check ${checked?'checked':''}" data-select="${e.id}">${checked?'✓':''}</button>` : ''}
+        ${primaryTag ? `<span class="badge">${escapeHtml(primaryTag)}${tags.length>1 ? ' +'+(tags.length-1) : ''}</span>` : ''}
+        ${!imgSrc ? sparkles() : ''}
+      </div>
+      <div>
+        <p class="no">${escapeHtml(e.no)}</p>
+        <h2 class="title">${escapeHtml(e.title)}</h2>
+        <div class="entry-tags">
+          ${tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('')}
+        </div>
+        <p class="howto-label">HOW TO</p>
+        <p class="howto">${escapeHtml(e.howto)}</p>
+        <div class="entry-actions ${editMode && !selectMode ? 'show' : ''}">
+          <button class="mini-btn edit" data-action="edit" data-id="${e.id}">編集</button>
+          <button class="mini-btn del" data-action="del" data-id="${e.id}">削除</button>
+        </div>
+      </div>
+    </div>
+  `;
+  }).join('');
+}
+
+function render(){
+  renderTabs();
+  renderList();
+  document.getElementById('addBtn').classList.toggle('show', editMode && !selectMode);
+  document.getElementById('toolbarRight').style.display = editMode ? 'flex' : 'none';
+  const bulkBar = document.getElementById('bulkBar');
+  bulkBar.classList.toggle('show', selectMode);
+  document.getElementById('bulkCount').textContent = selectedIds.size + '件選択中';
+  document.getElementById('selectToggleBtn').textContent = selectMode ? '選択を終了' : '選択';
+}
+
+function openModal(entry){
+  editingId = entry ? entry.id : null;
+  document.getElementById('modalTitle').textContent = entry ? '事例を編集' : '新しい事例を追加';
+  document.getElementById('f_no').value = entry ? entry.no : `No.0${entries.length+1}`;
+  document.getElementById('f_title').value = entry ? entry.title : '';
+  document.getElementById('f_howto').value = entry ? entry.howto : '';
+  const resolvedImg = entry ? imgSrcFor(entry) : '';
+  document.getElementById('f_img').value = entry && entry.img !== 'local' ? entry.img : '';
+  document.getElementById('f_imgFile').value = '';
+  document.getElementById('f_tagInput').value = '';
+  currentTags = entry ? [...(entry.tags || [])] : [];
+  renderTagEditor();
+  originalImgFlag = entry ? entry.img : '';
+  explicitImgClear = false;
+  updateImgPreview(resolvedImg);
+  document.getElementById('overlay').classList.add('show');
+}
+
+function renderTagEditor(){
+  const wrap = document.getElementById('tagEditor');
+  wrap.innerHTML = currentTags.map((t, i) => `
+    <span class="tag-chip">${escapeHtml(t)}<button type="button" data-idx="${i}">×</button></span>
+  `).join('');
+}
+function addCurrentTag(raw){
+  const t = raw.trim();
+  if(!t) return;
+  if(!currentTags.includes(t)) currentTags.push(t);
+  document.getElementById('f_tagInput').value = '';
+  renderTagEditor();
+}
+function updateImgPreview(src){
+  const wrap = document.getElementById('imgPreviewWrap');
+  const img = document.getElementById('imgPreview');
+  if(src){
+    img.src = src;
+    wrap.style.display = 'block';
+  }else{
+    img.src = '';
+    wrap.style.display = 'none';
+  }
+}
+function closeModal(){
+  document.getElementById('overlay').classList.remove('show');
+  editingId = null;
+}
+
+function handleSave(){
+  const no = document.getElementById('f_no').value.trim();
+  const title = document.getElementById('f_title').value.trim();
+  const howto = document.getElementById('f_howto').value.trim();
+  const rawImg = document.getElementById('f_img').value.trim();
+  const tags = [...currentTags];
+
+  if(!title){
+    showToast('タイトルは必須です');
+    return;
+  }
+
+  const id = editingId || ('e' + Date.now());
+  let imgFlag = '';
+
+  if(rawImg.startsWith('data:')){
+    try{
+      saveImage(id, rawImg);
+      imageCache[id] = rawImg;
+      imgFlag = 'local';
+    }catch(e){
+      showToast('画像の保存に失敗しました。サイズを小さくしてお試しください。');
+      return;
+    }
+  }else if(rawImg){
+    if(originalImgFlag === 'local'){ deleteImage(id); delete imageCache[id]; }
+    imgFlag = rawImg;
+  }else if(explicitImgClear){
+    if(originalImgFlag === 'local'){ deleteImage(id); delete imageCache[id]; }
+    imgFlag = '';
+  }else{
+    imgFlag = originalImgFlag || '';
+  }
+
+  if(editingId){
+    const idx = entries.findIndex(e => e.id === editingId);
+    if(idx > -1){
+      entries[idx] = { ...entries[idx], no, tags, title, howto, img: imgFlag };
+    }
+  }else{
+    entries.push({ id, no, tags, title, howto, img: imgFlag });
+  }
+
+  saveEntries();
+  closeModal();
+  render();
+  showToast('保存しました');
+}
+
+function buildStudentHtml(){
+  const dataForExport = entries.map(e => ({
+    no: e.no,
+    tags: e.tags || [],
+    title: e.title,
+    howto: e.howto,
+    img: imgSrcFor(e)
+  }));
+  const json = JSON.stringify(dataForExport).replace(/</g, '\\u003c');
+  return `<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>みさこのストーリー解説集</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--paper:#F3F7F9;--ink:#1C2E38;--ink-soft:#5C7480;--rose:#2B7A9E;--rose-deep:#1B5A78;--card:#FFFFFF;--line:#D9E6EB;}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:var(--paper);color:var(--ink);font-family:'Zen Kaku Gothic New', sans-serif;-webkit-font-smoothing:antialiased;}
+.wrap{max-width:920px;margin:0 auto;padding:56px 24px 100px;}
+header{margin-bottom:36px;}
+.kicker{font-size:12.5px;letter-spacing:.14em;color:var(--rose-deep);margin:0 0 10px;font-weight:500;}
+h1{font-family:'Shippori Mincho', serif;font-weight:700;font-size:clamp(28px,5vw,42px);line-height:1.35;margin:0;}
+h1 .accent{color:var(--rose);}
+.controls{margin-top:28px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:16px 0;}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;}
+.tab{font-family:inherit;font-size:13px;padding:8px 16px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink-soft);cursor:pointer;}
+.tab.active{background:var(--ink);border-color:var(--ink);color:#fff;}
+.search{position:relative;min-width:200px;}
+.search input{width:100%;font-family:inherit;font-size:13px;padding:9px 14px 9px 32px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);outline:none;}
+.search input:focus{border-color:var(--rose);}
+.search::before{content:"";position:absolute;left:12px;top:50%;width:11px;height:11px;transform:translateY(-50%);border:1.5px solid var(--ink-soft);border-radius:50%;}
+.search::after{content:"";position:absolute;left:20px;top:60%;width:6px;height:1.5px;background:var(--ink-soft);transform:rotate(45deg);}
+.count{font-size:12px;color:var(--ink-soft);margin:18px 2px 0;}
+.entry{display:grid;grid-template-columns:172px 1fr;gap:32px;padding:36px 0;border-bottom:1px solid var(--line);align-items:start;}
+.entry:first-of-type{padding-top:28px;}
+.phone{width:172px;height:306px;border-radius:22px;position:relative;overflow:hidden;box-shadow:0 10px 26px -14px rgba(28,46,56,.35);flex-shrink:0;background-size:cover;background-position:center;}
+.phone .badge{position:absolute;top:10px;left:10px;font-size:9.5px;letter-spacing:.05em;color:#fff;background:rgba(0,0,0,.28);padding:3px 8px;border-radius:999px;}
+.spark{position:absolute;border-radius:50%;background:#fff;opacity:.85;}
+.no{font-family:'Shippori Mincho', serif;font-size:12.5px;color:var(--rose-deep);letter-spacing:.06em;margin:0 0 6px;}
+.tag{display:inline-block;font-size:11px;color:var(--rose-deep);border:1px solid #C7DEE7;background:#EAF4F8;padding:2px 9px;border-radius:999px;margin:0 6px 6px 0;}
+.entry-tags{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 10px;}
+.title{font-family:'Shippori Mincho', serif;font-weight:700;font-size:21px;line-height:1.5;margin:0 0 14px;}
+.howto-label{font-size:11px;color:var(--ink-soft);letter-spacing:.1em;margin:0 0 6px;}
+.howto{font-size:14px;line-height:1.95;color:var(--ink);margin:0;max-width:56ch;white-space:pre-wrap;}
+@media (max-width:600px){.entry{grid-template-columns:1fr;gap:16px;}.phone{width:132px;height:235px;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="kicker">STORY DESIGN NOTE</p>
+    <h1>みさこの<span class="accent">ストーリー解説集</span></h1>
+  </header>
+  <div class="controls">
+    <div class="tabs" id="tabs"></div>
+    <div class="search"><input type="text" id="searchInput" placeholder="キーワードで検索"></div>
+  </div>
+  <p class="count" id="count"></p>
+  <div id="list"></div>
+</div>
+<script>
+const entries = ${json};
+const gradients = ["linear-gradient(160deg,#BFE3EF,#7FB8CE)","linear-gradient(165deg,#E3F1F6,#B9D9E4)","linear-gradient(180deg,#16303F,#0B1A22)","linear-gradient(180deg,#123249,#0C4258)","linear-gradient(160deg,#D6E9F2,#A9CEDE)","linear-gradient(160deg,#CFE8E4,#9BC9C2)","linear-gradient(160deg,#AED4E8,#6FA8C4)","linear-gradient(160deg,#E0EFF5,#B7D4E2)"];
+function gradientFor(tag){const t=tag||'未分類';let h=0;for(let i=0;i<t.length;i++){h=(h*31+t.charCodeAt(i))%gradients.length;}return gradients[Math.abs(h)];}
+function sparkles(){let s='';for(let i=0;i<5;i++){const x=15+Math.random()*140;const y=20+Math.random()*140;const r=1+Math.random()*2;s+=\`<span class="spark" style="left:\${x}px;top:\${y}px;width:\${r}px;height:\${r}px;"></span>\`;}return s;}
+function escapeHtml(str){return (str||'').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
+let activeTag='all';let query='';
+function renderTabs(){
+  const allTags=Array.from(new Set(entries.flatMap(e=>e.tags||[]))).filter(Boolean);
+  document.getElementById('tabs').innerHTML=\`<button class="tab \${activeTag==='all'?'active':''}" data-tag="all">すべて</button>\`+allTags.map(t=>\`<button class="tab \${activeTag===t?'active':''}" data-tag="\${escapeHtml(t)}">\${escapeHtml(t)}</button>\`).join('');
+}
+function renderList(){
+  let list=entries.filter(e=>activeTag==='all'||(e.tags||[]).includes(activeTag));
+  if(query.trim()){const q=query.trim();list=list.filter(e=>(e.title+e.howto+(e.tags||[]).join('')).includes(q));}
+  document.getElementById('count').textContent=list.length+' 件表示中';
+  const el=document.getElementById('list');
+  if(list.length===0){el.innerHTML='<p style="padding:40px 0;color:var(--ink-soft);font-size:13.5px;">該当する事例がありません。</p>';return;}
+  el.innerHTML=list.map(e=>{
+    const tags=e.tags||[];const primaryTag=tags[0]||'';
+    const bg=e.img?\`background-image:url('\${e.img}');\`:\`background:\${gradientFor(primaryTag)};\`;
+    return \`<div class="entry"><div class="phone" style="\${bg}">\${primaryTag?\`<span class="badge">\${escapeHtml(primaryTag)}\${tags.length>1?' +'+(tags.length-1):''}</span>\`:''}\${!e.img?sparkles():''}</div><div><p class="no">\${escapeHtml(e.no)}</p><h2 class="title">\${escapeHtml(e.title)}</h2><div class="entry-tags">\${tags.map(t=>\`<span class="tag">\${escapeHtml(t)}</span>\`).join('')}</div><p class="howto-label">HOW TO</p><p class="howto">\${escapeHtml(e.howto)}</p></div></div>\`;
+  }).join('');
+}
+function render(){renderTabs();renderList();}
+document.getElementById('tabs').addEventListener('click',ev=>{const btn=ev.target.closest('.tab');if(!btn)return;activeTag=btn.dataset.tag;render();});
+document.getElementById('searchInput').addEventListener('input',ev=>{query=ev.target.value;renderList();});
+render();
+<\/script>
+</body>
+</html>`;
+}
+
+// ---- ツールバー / モーダル操作 ----
+
+document.getElementById('editToggle').addEventListener('click', (e) => {
+  if(!editMode){
+    const input = prompt('編集パスワードを入力してください');
+    if(input === null) return;
+    if(input !== EDIT_PASSWORD){
+      showToast('パスワードが違います');
+      return;
+    }
+  }
+  editMode = !editMode;
+  e.target.textContent = editMode ? '編集モードをOFF' : '✎ 編集モードをON';
+  e.target.classList.toggle('off', !editMode);
+  render();
+});
+
+document.getElementById('tabs').addEventListener('click', (ev) => {
+  const btn = ev.target.closest('.tab');
+  if(!btn) return;
+  activeTag = btn.dataset.tag;
+  render();
+});
+
+document.getElementById('searchInput').addEventListener('input', (ev) => {
+  query = ev.target.value;
+  renderList();
+});
+
+document.getElementById('f_imgFile').addEventListener('change', (ev) => {
+  const file = ev.target.files[0];
+  if(!file) return;
+  if(file.size > MAX_IMG_BYTES){
+    showToast('画像が大きすぎます（3MB以下にしてください）');
+    ev.target.value = '';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = () => {
+    document.getElementById('f_img').value = reader.result;
+    updateImgPreview(reader.result);
+  };
+  reader.readAsDataURL(file);
+});
+
+document.getElementById('f_img').addEventListener('input', (ev) => {
+  updateImgPreview(ev.target.value);
+});
+
+document.getElementById('clearImgBtn').addEventListener('click', () => {
+  document.getElementById('f_img').value = '';
+  document.getElementById('f_imgFile').value = '';
+  explicitImgClear = true;
+  updateImgPreview('');
+});
+
+document.getElementById('addTagBtn').addEventListener('click', () => {
+  addCurrentTag(document.getElementById('f_tagInput').value);
+});
+document.getElementById('f_tagInput').addEventListener('keydown', (ev) => {
+  if(ev.key === 'Enter'){
+    ev.preventDefault();
+    addCurrentTag(ev.target.value);
+  }
+});
+document.getElementById('tagEditor').addEventListener('click', (ev) => {
+  const btn = ev.target.closest('button[data-idx]');
+  if(!btn) return;
+  currentTags.splice(Number(btn.dataset.idx), 1);
+  renderTagEditor();
+});
+
+document.getElementById('addBtn').addEventListener('click', () => openModal(null));
+document.getElementById('cancelBtn').addEventListener('click', closeModal);
+document.getElementById('saveBtn').addEventListener('click', handleSave);
+document.getElementById('overlay').addEventListener('click', (ev) => { if(ev.target.id === 'overlay') closeModal(); });
+
+document.getElementById('list').addEventListener('click', (ev) => {
+  const selectBtn = ev.target.closest('[data-select]');
+  if(selectBtn){
+    const id = selectBtn.dataset.select;
+    if(selectedIds.has(id)) selectedIds.delete(id); else selectedIds.add(id);
+    renderList();
+    document.getElementById('bulkCount').textContent = selectedIds.size + '件選択中';
+    return;
+  }
+  const btn = ev.target.closest('[data-action]');
+  if(!btn || selectMode) return;
+  const id = btn.dataset.id;
+  if(btn.dataset.action === 'edit'){
+    const entry = entries.find(e => e.id === id);
+    openModal(entry);
+  }else if(btn.dataset.action === 'del'){
+    if(confirm('この事例を削除しますか？')){
+      const target = entries.find(e => e.id === id);
+      if(target && target.img === 'local'){ deleteImage(id); delete imageCache[id]; }
+      entries = entries.filter(e => e.id !== id);
+      saveEntries();
+      render();
+      showToast('削除しました');
+    }
+  }
+});
+
+document.getElementById('selectToggleBtn').addEventListener('click', () => {
+  selectMode = !selectMode;
+  selectedIds.clear();
+  render();
+});
+document.getElementById('bulkCancelBtn').addEventListener('click', () => {
+  selectMode = false;
+  selectedIds.clear();
+  render();
+});
+document.getElementById('bulkDuplicateBtn').addEventListener('click', () => {
+  if(selectedIds.size === 0){ showToast('複製する事例を選んでください'); return; }
+  const toDuplicate = entries.filter(e => selectedIds.has(e.id));
+  toDuplicate.forEach(e => {
+    const newId = 'e' + Date.now() + Math.random().toString(36).slice(2,6);
+    if(e.img === 'local' && imageCache[e.id]){
+      saveImage(newId, imageCache[e.id]);
+      imageCache[newId] = imageCache[e.id];
+    }
+    entries.push({ ...e, id: newId, no: e.no + '（コピー）' });
+  });
+  saveEntries();
+  selectedIds.clear();
+  selectMode = false;
+  render();
+  showToast('複製しました');
+});
+document.getElementById('bulkDeleteBtn').addEventListener('click', () => {
+  if(selectedIds.size === 0){ showToast('削除する事例を選んでください'); return; }
+  if(confirm(selectedIds.size + '件を削除します。よろしいですか？')){
+    selectedIds.forEach(id => {
+      const target = entries.find(e => e.id === id);
+      if(target && target.img === 'local'){ deleteImage(id); delete imageCache[id]; }
+    });
+    entries = entries.filter(e => !selectedIds.has(e.id));
+    saveEntries();
+    selectedIds.clear();
+    selectMode = false;
+    render();
+    showToast('削除しました');
+  }
+});
+
+document.getElementById('exportBtn').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(entries, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'story_design_note_entries.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('JSONを書き出しました');
+});
+
+document.getElementById('importBtn').addEventListener('click', () => {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'application/json';
+  input.onchange = () => {
+    const file = input.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try{
+        const parsed = JSON.parse(reader.result);
+        if(Array.isArray(parsed)){
+          entries = migrate(parsed);
+          saveEntries();
+          loadAllImages();
+          render();
+          showToast('読み込みました');
+        }else{
+          showToast('形式が正しくありません');
+        }
+      }catch(e){
+        showToast('JSONの読み込みに失敗しました');
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+});
+
+document.getElementById('exportStudentBtn').addEventListener('click', () => {
+  if(entries.length === 0){
+    showToast('事例がまだ登録されていません');
+    return;
+  }
+  const html = buildStudentHtml();
+  const blob = new Blob([html], {type:'text/html'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'みさこのストーリー解説集_生徒用.html';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('生徒用ページを書き出しました');
+});
+
+loadEntries();
+loadAllImages();
+render();
+</script>
+</body>
+</html>
