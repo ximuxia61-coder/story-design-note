@@ -38,6 +38,16 @@ h1 .accent{color:var(--rose);}
 .title{font-family:'Shippori Mincho', serif;font-weight:700;font-size:21px;line-height:1.5;margin:0 0 14px;}
 .howto-label{font-size:11px;color:var(--ink-soft);letter-spacing:.1em;margin:0 0 6px;}
 .howto{font-size:14px;line-height:1.95;color:var(--ink);margin:0;max-width:56ch;white-space:pre-wrap;}
+.phone.has-img{cursor:zoom-in;}
+.lb{position:fixed;inset:0;background:rgba(10,20,26,.88);display:none;align-items:center;justify-content:center;z-index:100;padding:24px;}
+.lb.show{display:flex;}
+.lb img{max-width:100%;max-height:100%;object-fit:contain;border-radius:12px;cursor:zoom-out;}
+.lb button{position:absolute;border:none;background:rgba(255,255,255,.16);color:#fff;width:44px;height:44px;border-radius:50%;font-size:24px;cursor:pointer;line-height:1;font-family:inherit;}
+.lb button:hover{background:rgba(255,255,255,.3);}
+.lb .close{top:16px;right:16px;}
+.lb .prev{left:16px;top:50%;transform:translateY(-50%);}
+.lb .next{right:16px;top:50%;transform:translateY(-50%);}
+.lb .cnt{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);color:#fff;font-size:12px;opacity:.8;}
 @media (max-width:600px){.entry{grid-template-columns:1fr;gap:16px;}.phone{width:132px;height:235px;}}
 </style>
 </head>
@@ -54,6 +64,13 @@ h1 .accent{color:var(--rose);}
   <p class="count" id="count"></p>
   <div id="list"></div>
 </div>
+<div class="lb" id="lb" role="dialog" aria-label="画像の拡大表示">
+  <button class="close" data-a="close" aria-label="閉じる">×</button>
+  <button class="prev" data-a="prev" aria-label="前の画像">‹</button>
+  <img id="lbImg" alt="">
+  <button class="next" data-a="next" aria-label="次の画像">›</button>
+  <span class="cnt" id="lbCnt"></span>
+</div>
 <script>
 const entries = [
   { no:"001", tags:["テストA"], title:"テスト1", howto:"この画像が表示されていれば、images/001.jpg の読み込みに成功しています。", img:"images/001.jpg" },
@@ -63,7 +80,7 @@ const entries = [
 const gradients = ["linear-gradient(160deg,#BFE3EF,#7FB8CE)","linear-gradient(165deg,#E3F1F6,#B9D9E4)","linear-gradient(180deg,#16303F,#0B1A22)","linear-gradient(180deg,#123249,#0C4258)","linear-gradient(160deg,#D6E9F2,#A9CEDE)","linear-gradient(160deg,#CFE8E4,#9BC9C2)"];
 function gradientFor(tag){const t=tag||'未分類';let h=0;for(let i=0;i<t.length;i++){h=(h*31+t.charCodeAt(i))%gradients.length;}return gradients[Math.abs(h)];}
 function escapeHtml(s){return (s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));}
-let activeTag='all',query='';
+let activeTag='all',query='',view=[];
 function renderTabs(){
   const allTags=Array.from(new Set(entries.flatMap(e=>e.tags||[]))).filter(Boolean);
   document.getElementById('tabs').innerHTML='<button class="tab '+(activeTag==='all'?'active':'')+'" data-tag="all">すべて</button>'+allTags.map(t=>'<button class="tab '+(activeTag===t?'active':'')+'" data-tag="'+escapeHtml(t)+'">'+escapeHtml(t)+'</button>').join('');
@@ -72,12 +89,13 @@ function renderList(){
   let list=entries.filter(e=>activeTag==='all'||(e.tags||[]).includes(activeTag));
   if(query.trim()){const q=query.trim();list=list.filter(e=>(e.title+e.howto+(e.tags||[]).join('')).includes(q));}
   document.getElementById('count').textContent=list.length+' 件表示中';
+  view=list;
   const el=document.getElementById('list');
   if(list.length===0){el.innerHTML='<p style="padding:40px 0;color:var(--ink-soft);font-size:13.5px;">該当する事例がありません。</p>';return;}
-  el.innerHTML=list.map(e=>{
+  el.innerHTML=list.map((e,i)=>{
     const tags=e.tags||[];const p=tags[0]||'';
-    return '<div class="entry"><div class="phone" style="background:'+gradientFor(p)+'">'
-      +(e.img?'<img src="'+escapeHtml(e.img)+'" alt="" loading="lazy" onerror="this.remove()">':'')
+    return '<div class="entry"><div class="phone'+(e.img?' has-img':'')+'" data-i="'+i+'" style="background:'+gradientFor(p)+'">'
+      +(e.img?'<img src="'+escapeHtml(e.img)+'" alt="" loading="lazy" onerror="this.parentNode.classList.remove(\'has-img\');this.remove()">':'')
       +(p?'<span class="badge">'+escapeHtml(p)+(tags.length>1?' +'+(tags.length-1):'')+'</span>':'')
       +'</div><div><p class="no">No.'+escapeHtml(e.no)+'</p><h2 class="title">'+escapeHtml(e.title)+'</h2><div class="entry-tags">'
       +tags.map(t=>'<span class="tag">'+escapeHtml(t)+'</span>').join('')
@@ -85,6 +103,31 @@ function renderList(){
   }).join('');
 }
 function render(){renderTabs();renderList();}
+const lb=document.getElementById('lb'),lbImg=document.getElementById('lbImg'),lbCnt=document.getElementById('lbCnt');
+let lbList=[],lbPos=0;
+function showLb(){
+  const e=lbList[lbPos];
+  lbImg.src=e.img;
+  lbCnt.textContent=(lbPos+1)+' / '+lbList.length;
+  lb.querySelector('.prev').style.display=lb.querySelector('.next').style.display=lbList.length>1?'':'none';
+  lb.classList.add('show');
+  document.body.style.overflow='hidden';
+}
+function openLb(i){lbList=view.filter(e=>e.img);lbPos=lbList.indexOf(view[i]);if(lbPos<0)return;showLb();}
+function closeLb(){lb.classList.remove('show');lbImg.removeAttribute('src');document.body.style.overflow='';}
+function stepLb(d){lbPos=(lbPos+d+lbList.length)%lbList.length;showLb();}
+document.getElementById('list').addEventListener('click',ev=>{const ph=ev.target.closest('.phone.has-img');if(ph)openLb(Number(ph.dataset.i));});
+lb.addEventListener('click',ev=>{
+  const b=ev.target.closest('button');
+  if(b){if(b.dataset.a==='prev')stepLb(-1);else if(b.dataset.a==='next')stepLb(1);else closeLb();return;}
+  closeLb();
+});
+document.addEventListener('keydown',ev=>{
+  if(!lb.classList.contains('show'))return;
+  if(ev.key==='Escape')closeLb();
+  else if(ev.key==='ArrowLeft')stepLb(-1);
+  else if(ev.key==='ArrowRight')stepLb(1);
+});
 document.getElementById('tabs').addEventListener('click',ev=>{const b=ev.target.closest('.tab');if(!b)return;activeTag=b.dataset.tag;render();});
 document.getElementById('searchInput').addEventListener('input',ev=>{query=ev.target.value;renderList();});
 render();
